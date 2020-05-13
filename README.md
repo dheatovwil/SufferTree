@@ -6,7 +6,7 @@ fix it before you complain it.
 
 ## Usage
 Call `main.simple_start(root)` with your root node to fire up a http server and open your browser, hopefully with your 
-tree visualized.
+tree visualized.  Path is not handled, you probably have to put your scripts with this under the same directory.
 
 ## Note
 * As of now, it doesn't handle anything more than label.
