@@ -1,15 +1,5 @@
-import webbrowser
-import gen_json
-import threading
-import os
+import gen
 
 
-def run():
-    os.system("python -m http.server")
-
-
-def simple_start(root):
-    gen_json.main(root)
-    t = threading.Thread(target=run, daemon=True).start()
-    webbrowser.open("localhost:8000/index.html", new=1)
-    t.join()
+def visualize(root):
+    gen.gen_dot(root).view()
