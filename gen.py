@@ -77,8 +77,8 @@ class State:
     ctr: int = 0
 
 
-def gen_dot(root, higher=None):
-    f = graphviz.Digraph("sfx3", format="png")
+def gen_dot(root, higher=None, attr=None):
+    f = graphviz.Digraph("sfx3", format="png", graph_attr=attr)
 
     nmap = {            # map node to a string identifier
         root: "ROOT"

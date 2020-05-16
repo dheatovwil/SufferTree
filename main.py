@@ -14,7 +14,8 @@ class Series:
         }
 
     def add(self, root):
-        gen.gen_dot(root, self.higher).render(str(self.ctr).zfill(2), directory="out", cleanup=True, format="png")
+        attr = [("ratio", "0.57"), ("viewport", "1280,720,1,ROOT")]
+        gen.gen_dot(root, self.higher, attr).render(str(self.ctr).zfill(2), directory="out", cleanup=True, format="png")
         self.ctr += 1
 
 
