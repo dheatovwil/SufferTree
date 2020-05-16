@@ -17,35 +17,58 @@ import graphviz
 from dataclasses import dataclass
 
 
-def dot(node, f: graphviz.Digraph, state):
-    nmap = state.nmap
+def traverse(node, edge_handler=lambda x: None, node_handler=lambda x: None):
     if node.is_leaf:
         return
 
     for edge in node.table:
         if edge is None:
             continue
+        edge_handler(edge)
+        traverse(edge.dst, edge_handler, node_handler)
+
+    node_handler(node)
+
+
+def dot(node, f: graphviz.Digraph, state):
+    nmap = state.nmap
+
+    def edge_handler(edge):
         if edge.dst not in nmap:
             nmap[edge.dst] = "n%d" % state.ctr
             state.ctr += 1
             f.node(nmap[edge.dst], str(edge.label))
         f.edge(nmap[edge.src], nmap[edge.dst])
-        dot(edge.dst, f, state)
+
+    traverse(node, edge_handler=edge_handler)
 
 
 def dot_suf(node, f, state):
-    if node.is_leaf:
-        return
-
     nmap = state.nmap
 
-    for edge in node.table:
-        if edge is None:
-            continue
-        dot_suf(edge.dst, f, state)
+    def node_handler(node):
+        if node.link is not None:
+            f.edge(nmap[node], nmap[node.link], _attributes=[("style", "dashed"), ("color", "red")])
 
-    if node.link is not None:
-        f.edge(nmap[node], nmap[node.link], _attributes=[("style", "dashed"), ("color", "red")])
+    traverse(node, node_handler=node_handler)
+
+
+def dot_inc(node, f: graphviz.Digraph, state, higher):
+    nmap = state.nmap
+    created = higher["created"]
+
+    def edge_handler(edge):
+        if edge.dst not in nmap:
+            nmap[edge.dst] = "n%d" % state.ctr
+            state.ctr += 1
+            attr = []
+            if edge.dst not in created:
+                attr = [("fillcolor", "yellow"), ("style", "filled")]
+                created.append(edge.dst)
+            f.node(nmap[edge.dst], str(edge.label), _attributes=attr)
+        f.edge(nmap[edge.src], nmap[edge.dst])
+
+    traverse(node, edge_handler=edge_handler)
 
 
 @dataclass
@@ -54,7 +77,7 @@ class State:
     ctr: int = 0
 
 
-def gen_dot(root):
+def gen_dot(root, higher=None):
     f = graphviz.Digraph("sfx3", format="png")
 
     nmap = {            # map node to a string identifier
@@ -62,7 +85,10 @@ def gen_dot(root):
     }
     s = State(nmap)
 
-    dot(root, f, s)
+    if higher:
+        dot_inc(root, f, s, higher)
+    else:
+        dot(root, f, s)
     dot_suf(root, f, s)  # draw suffix link
 
     return f

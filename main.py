@@ -9,9 +9,12 @@ class Series:
         except FileExistsError:
             os.system("rm -rf out")
         self.ctr = 0
+        self.higher = {
+            "created": []
+        }
 
     def add(self, root):
-        gen.gen_dot(root).render(str(self.ctr).zfill(2), directory="out", cleanup=True, format="png")
+        gen.gen_dot(root, self.higher).render(str(self.ctr).zfill(2), directory="out", cleanup=True, format="png")
         self.ctr += 1
 
 
